@@ -1,0 +1,28 @@
+{
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat('nsgsubnet', copyIndex(1))]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+      "copy": {
+        "name": "nsgloop",
+        "count": "[parameters('nrOfSubnets')]"
+      }
+    }
