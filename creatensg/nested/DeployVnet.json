@@ -28,7 +28,6 @@
       "location": "[parameters('resourceLocation')]",
       "apiVersion": "2018-08-01",
       "dependsOn": [
-        "nsgloop",
         "[resourceId('Microsoft.Network/routeTables', parameters('routingTableName'))]"
       ],
       "properties": {
