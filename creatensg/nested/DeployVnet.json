@@ -10,10 +10,8 @@
     },
     "dnsServers": {
       "type":"string"
-    }
-  },
-  "variables": {
-    "workspaceNetworkName": {
+    },
+      "workspaceNetworkName": {
       "type":"string"
     },
     "routingTableName": {
@@ -21,17 +19,17 @@
     },
     "subnets": {
       "type":"string"
-    }
+  }
   },
   "resources": [
     {
-      "name": "[variables('workspaceNetworkName')]",
+      "name": "[parameters('workspaceNetworkName')]",
       "type": "Microsoft.Network/virtualNetworks",
       "location": "[parameters('resourceLocation')]",
       "apiVersion": "2018-08-01",
       "dependsOn": [
         "nsgloop",
-        "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+        "[resourceId('Microsoft.Network/routeTables', parameters('routingTableName'))]"
       ],
       "properties": {
         "addressSpace": {
@@ -45,14 +43,14 @@
         "copy": [
           {
             "name": "subnets",
-            "count": "[length(variables('subnets'))]",
+            "count": "[length(parameters('subnets'))]",
             "input": {
-              "name": "[variables('subnets')[copyIndex('subnets')].name]",
+              "name": "[parameters('subnets')[copyIndex('subnets')].name]",
               "properties": {
-                "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
+                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
 
                 "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('routingTableName'))]"
                 },
                 "serviceEndpoints": [
                   {
