@@ -6,7 +6,7 @@
     "resources": [
         {
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[concat('nsgsubnet', copyIndex(1))]",
+      "name": "nsg",
       "location": "[resourceGroup().location]",
       "apiVersion": "2018-03-01",
       "properties": {
