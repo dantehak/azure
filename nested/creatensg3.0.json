@@ -1,0 +1,103 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.1",
+  "parameters": {
+    "networkName": {
+      "type": "string"
+    },
+    "nrOfSubnets": {
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [
+          16,
+          32,
+          64,
+          128,
+          256
+      ]
+  },
+    "_artifactsLocation2": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located."
+      },
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-nsg-add-to-existing-subnet/"
+    },
+    "_artifactsLocationSasToken2": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation."
+      },
+      "defaultValue": ""
+    }
+  },
+  "variables": {
+    "virtualNetworkResourceGroupName": "[resourceGroup().name]"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat('nsgsubnet', copyIndex(1))]",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2018-03-01",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "SSH",
+            "properties": {
+              "description": "Allows SSH traffic",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "22",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 100,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      },
+       "copy": {
+        "name": "nsgloop",
+        "count": "[parameters('nrOfSubnets')]"
+      }
+    },
+    {
+      "apiVersion": "2017-08-01",
+      "name": "[concat('deploy', copyIndex(1))]",
+      "type": "Microsoft.Resources/deployments",
+      "resourceGroup": "[variables('virtualNetworkResourceGroupName')]",
+      "dependsOn": [
+        "nsgloop"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(parameters('_artifactsLocation2'), concat('nested/updateSubnet.json', parameters('_artifactsLocationSasToken2')))]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "virtualNetworkName": {
+            "value": "[parameters('networkName')]"
+          },
+          "subnetName": {
+            "value": "[concat('subnet', copyIndex(1))]"
+          },
+          "subnetAddressPrefix": {
+            "value": "[reference(resourceId(variables('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('networkName'), concat('subnet', copyIndex(1))), '2018-03-01').addressPrefix]"
+          },
+          "nsgId": {
+            "value": "[resourceId('Microsoft.Network/networkSecurityGroups', concat('nsgsubnet', copyIndex(1)))]"
+          }
+        }
+      },
+      "copy": {
+        "name": "nsgconnectloop",
+        "count": "[parameters('nrOfSubnets')]",
+        "mode": "Serial"
+      }
+      }
+    ],
+  "outputs": {}
+}
