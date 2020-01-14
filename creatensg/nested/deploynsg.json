@@ -20,9 +20,5 @@
             }
           }
         ]
-      },
-      "copy": {
-        "name": "nsgloop",
-        "count": "[parameters('nrOfSubnets')]"
       }
     }
