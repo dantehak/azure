@@ -18,7 +18,7 @@
       "type":"string"
     },
     "subnets": {
-      "type":"string"
+      "type":"array"
   }
   },
   "resources": [
