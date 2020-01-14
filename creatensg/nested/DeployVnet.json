@@ -9,7 +9,7 @@
       "type":"string"
     },
     "dnsServers": {
-      "type":"string"
+      "type":"array"
     },
       "workspaceNetworkName": {
       "type":"string"
