@@ -17,7 +17,7 @@
       }
     },
     "nrOfNsgs": {
-      "type": "int",
+      "type": "string",
       "defaultValue": 128,
       "allowedValues": [
           16,
