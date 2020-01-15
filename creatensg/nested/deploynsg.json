@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {},
     "variables": {
-      "nsgname1": "[concat('nsgsubnet', copyIndex(1))]",
+      "nsgname1": "[concat('nsgsubnet', copyIndex(1))]"
     },
     "resources": [
         {
