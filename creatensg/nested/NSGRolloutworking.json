@@ -17,9 +17,15 @@
       }
     },
     "nrOfNsgs": {
-      "type": "string",
-      "defaultValue": 128
-     
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [
+          16,
+          32,
+          64,
+          128,
+          256
+      ]
   },
     "_artifactsLocation": {
       "type": "string",
