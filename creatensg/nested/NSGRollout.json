@@ -63,7 +63,7 @@
       },
        "copy": {
         "name": "nsgloop",
-        "count": "[parameters('nrOfNsgs')]"
+        "count": "16"
       }
     },
     {
@@ -97,7 +97,7 @@
       },
       "copy": {
         "name": "nsgconnectloop",
-        "count": "[parameters('nrOfNsgs')]",
+        "count": "16",
         "mode": "Serial"
       }
       }
