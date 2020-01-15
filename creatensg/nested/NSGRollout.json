@@ -63,7 +63,7 @@
       },
        "copy": {
         "name": "nsgloop",
-        "count": "16"
+        "count": 16
       }
     },
     {
@@ -97,7 +97,7 @@
       },
       "copy": {
         "name": "nsgconnectloop",
-        "count": "16",
+        "count": 16,
         "mode": "Serial"
       }
       }
