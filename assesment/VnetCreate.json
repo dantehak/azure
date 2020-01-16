@@ -4,6 +4,9 @@
   "parameters": {
     "VnetName": {
       "type": "string"
+    },
+    "rgLocation": {
+      "type": "string"
     }
     },
     "variables": {
@@ -17,7 +20,7 @@
       {
         "name": "[concat(parameters('VnetName'), '-vnet')]",
         "type": "Microsoft.Network/virtualNetworks",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('rgLocation')]",
         "apiVersion": "2016-03-30",
         "dependsOn": [],
         "tags": {
