@@ -10,6 +10,7 @@
     }
     },
     "variables": {
+        "creatergstring": "[uniqueString(resourceGroup().id)]",
       "VnetPrefix": "10.0.0.0/16",
       "VnetSubnet1Name": "Subnet-1",
       "VnetSubnet1Prefix": "10.0.0.0/24",
@@ -18,13 +19,13 @@
     },
     "resources": [
       {
-        "name": "[concat(parameters('VnetName'), '-vnet')]",
+        "name": "[concat(parameters('VnetName'), variables('creatergstring'), '-vnet')]",
         "type": "Microsoft.Network/virtualNetworks",
         "location": "[parameters('rgLocation')]",
         "apiVersion": "2016-03-30",
         "dependsOn": [],
         "tags": {
-          "displayName": "Vnet"
+          "displayName": "Virtual Network"
         },
         "properties": {
           "addressSpace": {
