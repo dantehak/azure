@@ -8,7 +8,7 @@
         "description": "Specifies the name of the key vault."
       }
     },
-    "location": {
+    "keyvaultlocation": {
       "type": "string",
       "defaultValue": "[resourceGroup().location]",
       "metadata": {
@@ -108,7 +108,7 @@
       "type": "Microsoft.KeyVault/vaults",
       "name": "[parameters('keyVaultName')]",
       "apiVersion": "2018-02-14",
-      "location": "[parameters('location')]",
+      "location": "[parameters('keyvaultlocation')]",
       "properties": {
         "enabledForDeployment": "[parameters('enabledForDeployment')]",
         "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
@@ -138,7 +138,7 @@
       "type": "Microsoft.KeyVault/vaults/secrets",
       "name": "[concat(parameters('keyVaultName'), '/', parameters('secretName'))]",
       "apiVersion": "2018-02-14",
-      "location": "[parameters('location')]",
+      "location": "[parameters('keyvaultlocation')]",
       "dependsOn": [
         "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
       ],
