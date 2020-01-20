@@ -105,7 +105,7 @@
   },
 
 "variables": {
-      "keyvaultname": "[concat(parameters('keyvaultname'), resourceGroup().name)]"
+      "keyvaultname": "[concat(parameters('keyvaultname'), uniquestring(resourceGroup().id))]"
     },
 
 
@@ -142,11 +142,11 @@
     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
-      "name": "[concat(parameters('keyVaultName'), '/', parameters('secretName'))]",
+      "name": "[concat(variables('keyVaultName'), '/', parameters('secretName'))]",
       "apiVersion": "2018-02-14",
       "location": "[parameters('keyvaultlocation')]",
       "dependsOn": [
-        "[variables('keyvaultname')]"
+        "[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]"
       ],
       "properties": {
         "value": "[parameters('secretValue')]"
