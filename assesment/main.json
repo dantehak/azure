@@ -297,14 +297,17 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2018-05-01",
       "dependsOn": [
-          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+          "StorageCreate"
        ],
       "name": "KeyvaultCreate",
       "resourceGroup": "[parameters('rgName')]",
       "properties": {
         "mode": "Incremental",
+        "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
         "templateLink": {
-          "uri": "[parameters('keyvaultcreatelocation')]",
+          "uri": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/KeyvaultCreate.json",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {

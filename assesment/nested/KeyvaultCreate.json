@@ -112,7 +112,7 @@
   "resources": [
     {
       "type": "Microsoft.KeyVault/vaults",
-      "name": "[concat(parameters('keyVaultName'),'keyvault')]",
+      "name": "[parameters('keyVaultName')]",
       "apiVersion": "2018-02-14",
       "location": "[parameters('keyvaultlocation')]",
       "properties": {
@@ -146,7 +146,7 @@
       "apiVersion": "2018-02-14",
       "location": "[parameters('keyvaultlocation')]",
       "dependsOn": [
-        "[resourceId('Microsoft.KeyVault/vaults', concat(parameters('keyVaultName'),'keyvault'))]"
+        "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]"
       ],
       "properties": {
         "value": "[parameters('secretValue')]"
