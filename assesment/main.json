@@ -174,6 +174,52 @@
       "metadata": {
         "description": "Specifies the value of the secret that you want to create."
       }
+    },
+
+// WebApp Parameters
+
+      "webappcreatelocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/WebAppCreate.json"
+    },
+    
+     "hostingPlanName": {
+      "type": "string",
+      "defaultValue": "hosting",
+      "minLength": 1
+    },
+    "WebsiteName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skuNameFarmHosting": {
+      "type": "string",
+      "defaultValue": "F1",
+      "allowedValues": [
+        "F1",
+        "D1",
+        "B1",
+        "B2",
+        "B3",
+        "S1",
+        "S2",
+        "S3",
+        "P1",
+        "P2",
+        "P3",
+        "P4"
+      ],
+      "metadata": {
+        "description": "Describes plan's pricing tier and capacity. Check details at https://azure.microsoft.com/en-us/pricing/details/app-service/"
+      }
+    },
+    "skuHostingFarm": {
+      "type": "int",
+      "defaultValue": 1,
+      "minValue": 1,
+      "metadata": {
+        "description": "Describes plan's instance count"
+      }
     }
 
 
@@ -271,6 +317,30 @@
           "skuName": { "value": "[parameters('skuName')]" },
           "secretName": { "value": "[parameters('secretName')]" },
           "secretValue": { "value": "[parameters('secretValue')]" }
+        }
+      }
+    },
+
+// Create WebApp
+
+{
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "dependsOn": [
+          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+       ],
+      "name": "WebAppCreate",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[parameters('webappcreatelocation')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "storageAccountType": { "value": "[parameters('storageAccountType')]" },
+          "storagelocation": { "value": "[parameters('storagelocation')]" },
+          "isHnsEnabled": { "value": "[parameters('isHnsEnabled')]" }
         }
       }
     }
