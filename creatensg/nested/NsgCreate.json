@@ -4,14 +4,14 @@
   "parameters": {
     "virtualNetworkResourceGroupName": {
       "type": "string",
-      "defaultValue": "RapidCircle",
+      "defaultValue": "",
       "metadata": {
         "description": "The resource group where the existing VNet is located."
       }
     },
     "virtualNetworkName": {
       "type": "string",
-      "defaultValue": "rctest",
+      "defaultValue": "",
       "metadata": {
         "description": "The name of the existing VNet"
       }
