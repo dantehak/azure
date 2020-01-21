@@ -11,55 +11,247 @@
     "dnsServers": {
       "type":"array"
     },
-      "workspaceNetworkName": {
-      "type":"string"
+       "nrOfSubnets": {
+      "type": "int"
     },
-    "routingTableName": {
-      "type":"string"
+    "accessibleSubnetAddressPrefixes": {
+        "type": "array"
     },
-    "subnets": {
-      "type":"array"
-  }
+    "networkName": {
+      "type": "string"
+    },
+    "outboundIpAddress": {
+        "type": "string"
+    },
+    "accessibleInternetAddressPrefixes": {
+        "type": "array"
+    }
   },
-  "resources": [
-    {
-      "name": "[parameters('workspaceNetworkName')]",
-      "type": "Microsoft.Network/virtualNetworks",
-      "location": "[parameters('resourceLocation')]",
-      "apiVersion": "2018-08-01",
-      "dependsOn": [],
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[parameters('addressPrefix')]"
-          ]
+"variables": {
+      "virtualNetworkResourceGroupName": "[resourceGroup().name]",
+      "addressPrefixDelimiters": [
+        ".",
+        "/"
+      ],
+      "workspaceNetworkName": "[concat(parameters('networkName'), '-vnet')]",
+      "workspaceNsgName": "[concat(parameters('networkName'), '-nsg')]",
+      "routingTableName": "[concat(parameters('networkName'), '-routes')]",
+      "addressPrefixParts": "[split(parameters('addressPrefix'), variables('addressPrefixDelimiters'))]",
+      "addressPart1": "[int(variables('addressPrefixParts')[0])]",
+      "addressPart2": "[int(variables('addressPrefixParts')[1])]",
+      "addressPart3": "[int(variables('addressPrefixParts')[2])]",
+      "addressPart4": "[int(variables('addressPrefixParts')[3])]",
+      "nrAddressesPerSubnet": 16,
+      "subnetRoutingPrefixBits": 28,
+      "outboundNextHopType": "[if(empty(parameters('outboundIpAddress')), 'Internet', 'VirtualAppliance')]",
+
+      "defaultSecurityRules": [
+        {
+          "name": "AllowRdpInbound",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "3389",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 100,
+            "direction": "Inbound"
+          }
         },
-        "dhcpOptions": {
-          "dnsServers": "[parameters('dnsServers')]"
+        {
+          "name": "AllowSubnetAzureLoadBalancerInBound",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "AzureLoadBalancer",
+            "destinationAddressPrefix": "*",
+            "access": "Allow",
+            "priority": 200,
+            "direction": "Inbound"
+          }
         },
+        {
+          "name": "DenyVnetInBound",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "VirtualNetwork",
+            "destinationAddressPrefix": "VirtualNetwork",
+            "access": "Deny",
+            "priority": 4096,
+            "direction": "Inbound"
+          }
+        },
+        {
+          "name": "AllowStorageOutbound",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "Storage",
+            "access": "Allow",
+            "priority": 3000,
+            "direction": "Outbound"
+          }
+        },
+        {
+          "name": "DenyInternetOutbound",
+          "properties": {
+            "protocol": "*",
+            "sourcePortRange": "*",
+            "destinationPortRange": "*",
+            "sourceAddressPrefix": "*",
+            "destinationAddressPrefix": "Internet",
+            "access": "Deny",
+            "priority": 4096,
+            "direction": "Outbound"
+          }
+        }
+      ],
+      "copy": [
+        {
+          "name": "subnets",
+          "count": "[parameters('nrOfSubnets')]",
+          "input": {
+            "name": "[concat('subnet', copyIndex('subnets', 1))]",
+            "addressPrefix": "[concat(variables('addressPart1'), '.', variables('addressPart2'), '.', add(div(mul(copyIndex('subnets'), variables('nrAddressesPerSubnet')), 256), variables('addressPart3')), '.', mod(mul(copyIndex('subnets'), variables('nrAddressesPerSubnet')), 256), '/', variables('subnetRoutingPrefixBits'))]"
+          }
+        }
+      ],
+      "accessibleSubnetInboundSecurityRules": {
         "copy": [
           {
-            "name": "subnets",
-            "count": "[length(parameters('subnets'))]",
+            "name": "rules",
+            "count": "[length(parameters('accessibleSubnetAddressPrefixes'))]",
             "input": {
-              "name": "[parameters('subnets')[copyIndex('subnets')].name]",
+              "name": "[concat('allowAccessibleSubnetInbound', copyIndex('rules'))]",
               "properties": {
-                "addressPrefix": "[parameters('subnets')[copyIndex('subnets')].addressPrefix]",
-
-                "routeTable": {
-                  "id": "[resourceId('Microsoft.Network/routeTables', parameters('routingTableName'))]"
-                },
-                "serviceEndpoints": [
-                  {
-                    "service": "Microsoft.Storage"
-                  }
-                ]
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*",
+                "sourceAddressPrefix": "[parameters('accessibleSubnetAddressPrefixes')[copyIndex('rules')]]",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": "[add(1000, copyIndex('rules'))]",
+                "direction": "Inbound"
+              }
+            }
+          }
+        ]
+      },
+      "accessibleSubnetOutboundSecurityRules": {
+        "copy": [
+          {
+            "name": "rules",
+            "count": "[length(parameters('accessibleSubnetAddressPrefixes'))]",
+            "input": {
+              "name": "[concat('allowAccessibleSubnetOutbound', copyIndex('rules', 1))]",
+              "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "[parameters('accessibleSubnetAddressPrefixes')[copyIndex('rules')]]",
+                "access": "Allow",
+                "priority": "[add(1000, copyIndex('rules'))]",
+                "direction": "Outbound"
+              }
+            }
+          }
+        ]
+      },
+      "accessibleInternetOutboundSecurityRules": {
+        "copy": [
+          {
+            "name": "rules",
+            "count": "[length(parameters('accessibleInternetAddressPrefixes'))]",
+            "input": {
+              "name": "[concat('accessibleInternetAddress', copyIndex('rules', 1))]",
+              "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "*",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "[parameters('accessibleInternetAddressPrefixes')[copyIndex('rules')]]",
+                "access": "Allow",
+                "priority": "[add(2000, copyIndex('rules'))]",
+                "direction": "Outbound"
               }
             }
           }
         ]
       }
-    }
+    
+
+  },
+  "resources": [
+     {
+        "type": "Microsoft.Network/routeTables",
+        "name": "[variables('routingTableName')]",
+        "apiVersion": "2018-08-01",
+        "location": "[parameters('resourceLocation')]",
+        "properties": {
+          "copy": [
+            {
+              "name": "routes",
+              "count": "[length(parameters('accessibleInternetAddressPrefixes'))]",
+              "input": {
+                "name": "[concat('outboundInternet', copyIndex('routes'))]",
+                "properties": {
+                  "addressPrefix": "[parameters('accessibleInternetAddressPrefixes')[copyIndex('routes')]]",
+                  "nextHopType": "[variables('outboundNextHopType')]",
+                  "nextHopIpAddress": "[parameters('outboundIpAddress')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "[variables('workspaceNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "location": "[parameters('resourceLocation')]",
+        "apiVersion": "2018-08-01",
+        "dependsOn": [
+          
+          "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+        ],
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[parameters('addressPrefix')]"
+            ]
+          },
+          "dhcpOptions": {
+            "dnsServers": "[parameters('dnsServers')]"
+          },
+          "copy": [
+            {
+              "name": "subnets",
+              "count": "[length(variables('subnets'))]",
+              "input": {
+                "name": "[variables('subnets')[copyIndex('subnets')].name]",
+                "properties": {
+                  "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
+
+                  "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+                  },
+                  "serviceEndpoints": [
+                    {
+                      "service": "Microsoft.Storage"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
   ],
   "outputs": {}
 }
