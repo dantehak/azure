@@ -1,0 +1,175 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+  "contentVersion": "1.0.0.1",
+  "parameters": {
+
+    "networkName": {
+      "type": "string"
+    },
+    "addressPrefix": {
+      "type": "string"
+    },
+    "nrOfSubnets": {
+      "type": "int",
+      "defaultValue": 128,
+      "allowedValues": [
+        16,
+        32,
+        64,
+        128,
+        256
+      ]
+    },
+     "resourceLocation": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]"
+      },
+      "dnsServers": {
+        "type": "array",
+        "defaultValue": []
+      },
+      "accessibleSubnetAddressPrefixes": {
+        "type": "array",
+        "defaultValue": []
+      },
+      "accessibleInternetAddressPrefixes": {
+        "type": "array",
+        "defaultValue": []
+      },
+      "outboundIpAddress": {
+        "type": "string",
+        "defaultValue": ""
+      },
+      "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located."
+      },
+      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-nsg-add-to-existing-subnet/"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation."
+      },
+      "defaultValue": ""
+    }
+    },
+    "variables": {
+      "virtualNetworkResourceGroupName": "[resourceGroup().name]",
+      "addressPrefixDelimiters": [
+        ".",
+        "/"
+      ],
+      "workspaceNetworkName": "[concat(parameters('networkName'), '-vnet')]",
+      "routingTableName": "[concat(parameters('networkName'), '-routes')]",
+      "addressPrefixParts": "[split(parameters('addressPrefix'), variables('addressPrefixDelimiters'))]",
+      "addressPart1": "[int(variables('addressPrefixParts')[0])]",
+      "addressPart2": "[int(variables('addressPrefixParts')[1])]",
+      "addressPart3": "[int(variables('addressPrefixParts')[2])]",
+      "addressPart4": "[int(variables('addressPrefixParts')[3])]",
+      "nrAddressesPerSubnet": 16,
+      "subnetRoutingPrefixBits": 28,
+      "outboundNextHopType": "[if(empty(parameters('outboundIpAddress')), 'Internet', 'VirtualAppliance')]",
+      "copy": [
+        {
+          "name": "subnets",
+          "count": "[parameters('nrOfSubnets')]",
+          "input": {
+            "name": "[concat('subnet', copyIndex('subnets', 1))]",
+            "addressPrefix": "[concat(variables('addressPart1'), '.', variables('addressPart2'), '.', add(div(mul(copyIndex('subnets'), variables('nrAddressesPerSubnet')), 256), variables('addressPart3')), '.', mod(mul(copyIndex('subnets'), variables('nrAddressesPerSubnet')), 256), '/', variables('subnetRoutingPrefixBits'))]"
+          }
+        }
+      ]
+     
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Network/routeTables",
+        "name": "[variables('routingTableName')]",
+        "apiVersion": "2018-08-01",
+        "location": "[parameters('resourceLocation')]",
+        "properties": {
+          "copy": [
+            {
+              "name": "routes",
+              "count": "[length(parameters('accessibleInternetAddressPrefixes'))]",
+              "input": {
+                "name": "[concat('outboundInternet', copyIndex('routes'))]",
+                "properties": {
+                  "addressPrefix": "[parameters('accessibleInternetAddressPrefixes')[copyIndex('routes')]]",
+                  "nextHopType": "[variables('outboundNextHopType')]",
+                  "nextHopIpAddress": "[parameters('outboundIpAddress')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "[variables('workspaceNetworkName')]",
+        "type": "Microsoft.Network/virtualNetworks",
+        "location": "[parameters('resourceLocation')]",
+        "apiVersion": "2018-08-01",
+        "dependsOn": [
+          
+          "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+        ],
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[parameters('addressPrefix')]"
+            ]
+          },
+          "dhcpOptions": {
+            "dnsServers": "[parameters('dnsServers')]"
+          },
+          "copy": [
+            {
+              "name": "subnets",
+              "count": "[length(variables('subnets'))]",
+              "input": {
+                "name": "[variables('subnets')[copyIndex('subnets')].name]",
+                "properties": {
+                  "addressPrefix": "[variables('subnets')[copyIndex('subnets')].addressPrefix]",
+
+                  "routeTable": {
+                    "id": "[resourceId('Microsoft.Network/routeTables', variables('routingTableName'))]"
+                  },
+                  "serviceEndpoints": [
+                    {
+                      "service": "Microsoft.Storage"
+                    }
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "name": "Deploynsgs",
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2017-05-10",
+        "dependsOn": [
+          "[resourceId('Microsoft.Network/virtualNetworks', variables('workspaceNetworkName'))]"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          
+          "templateLink": {
+            "uri": "[concat(parameters('_artifactsLocation'), concat('nested/NsgCreate.json', parameters('_artifactsLocationSasToken')))]",
+            "contentVersion": "1.0.0.1"
+          },
+          "parameters": {
+            "virtualNetworkResourceGroupName": { "value": "[variables('virtualNetworkResourceGroupName')]" },
+            "virtualNetworkName": { "value": "[variables('workspaceNetworkName')]" },
+            "nrOfNsgs": { "value": "[string(parameters('nrOfSubnets'))]" },
+            "_artifactsLocation": { "value": "[parameters('_artifactsLocation')]" },
+            "_artifactsLocationSasToken": { "value": "[parameters('_artifactsLocationSasToken')]" }
+          }
+        }
+      }
+    ],
+    "outputs": {}
+  }
