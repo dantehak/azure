@@ -63,7 +63,7 @@
       },
        "copy": {
         "name": "nsgloop",
-        "count": 16
+        "count": "[parameters('nrOfNsgs')]"
       }
     },
     {
