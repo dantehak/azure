@@ -19,7 +19,7 @@
     },
     "resources": [
       {
-        "name": "[concat(parameters('VnetName'), '-', variables('creatergstring'), '-vnet')]",
+        "name": "[parameters('VnetName')]",
         "type": "Microsoft.Network/virtualNetworks",
         "location": "[parameters('rgLocation')]",
         "apiVersion": "2016-03-30",
