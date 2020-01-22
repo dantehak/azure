@@ -1,0 +1,214 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "websitename": {
+            "type": "String"
+        },
+      "applicationGatewaysname": {
+            "type": "String"
+        },
+        "VnetName": {
+            "type": "String"
+        },
+        "PublicIPName": {
+            "type": "String"
+        },
+        "pubipname": {
+            "type": "string"
+        },
+        "pubiplocation": {
+            "type": "string",
+            "defaultValue": "westeurope"
+
+        },
+        "pubipsku": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "allowedValues": [
+                "Basic",
+                "Standard"
+            ]
+        },
+        "publicIPAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Static",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ]
+        },
+        "pubipidleTimeoutInMinutes": {
+            "type": "int",
+            "defaultValue": 4
+        },
+        "pubipdomainNameLabel": {
+            "type": "string"
+            
+        },
+        "publicIpAddressVersion": {
+            "type": "string",
+            "defaultValue": "IPv4"
+        }
+    },
+    "variables": {
+    "VnetExtID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('VnetName'))]",
+    "VnetName": "[concat(parameters('VnetName'), '-', variables('creatergstring'), '-vnet')]",
+    "creatergstring": "[uniqueString(resourceGroup().id)]",
+    "PublicIPName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', variables('PublicIPName0'))]",
+    "applicationGatewaysname": "[concat(parameters('applicationGatewaysname'), '-', variables('creatergstring'), '-gateway')]",
+    "PublicIPName0": "[concat(parameters('PublicIPName'), '-', variables('creatergstring'), '-gwpubip')]",
+    "webSiteName": "[concat(parameters('WebsiteName'),'-', uniqueString(resourceGroup().id),'-','website')]",
+    "PubipName": "[concat(parameters('pubipname'), '-', variables('creatergstring'), '-gwpubip')]",
+    "PubipDomainName": "[concat(parameters('pubipdomainNameLabel'), '-', variables('creatergstring'), '-gwpubip')]"
+    },
+    "resources": [
+        {
+            "apiVersion": "2019-02-01",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[variables('pubipname')]",
+            "location": "[parameters('pubiplocation')]",
+            "sku": {
+                "name": "[parameters('pubipsku')]"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
+                "idleTimeoutInMinutes": "[parameters('pubipidleTimeoutInMinutes')]",
+                "publicIpAddressVersion": "[parameters('publicIpAddressVersion')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('pubipdomainName')]"
+                },
+                "ipTags": []
+            }
+        },
+         {
+            "type": "Microsoft.Network/applicationGateways",
+            "apiVersion": "2019-11-01",
+            "name": "[variables('applicationGatewaysname')]",
+            "dependsOn": [
+          "[resourceId('Microsoft.Network/publicIPAddresses/', variables('pubipname'))]"
+       ],
+            "location": "westeurope",
+            "properties": {
+                "sku": {
+                    "name": "Standard_v2",
+                    "tier": "Standard_v2"
+                },
+                "gatewayIPConfigurations": [
+                    {
+                        "name": "appGatewayIpConfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[concat(variables('VnetExtID'), '/subnets/Subnet-2')]"
+                            }
+                        }
+                    }
+                ],
+                "sslCertificates": [],
+                "trustedRootCertificates": [],
+                "frontendIPConfigurations": [
+                    {
+                        "name": "appGwPublicFrontendIp",
+                        "properties": {
+                            "privateIPAllocationMethod": "dynamic",
+                            "publicIPAddress": {
+                                "id": "[variables('PublicIPName')]"
+                            }
+                        }
+                    }
+                ],
+                "frontendPorts": [
+                    {
+                        "name": "port_80",
+                        "properties": {
+                            "port": 80
+                        }
+                    }
+                ],
+                "backendAddressPools": [
+                    {
+                        "name": "backendpool",
+                        "properties": {
+                            "backendAddresses": [
+                                {
+                                    "fqdn": "[concat(variables('WebSiteName'), '.azurewebsites.net')]"
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "backendHttpSettingsCollection": [
+                    {
+                        "name": "myhttpsettings",
+                        "properties": {
+                            "port": 80,
+                            "protocol": "Http",
+                            "cookieBasedAffinity": "Disabled",
+                            "pickHostNameFromBackendAddress": true,
+                            "requestTimeout": 20,
+                            "probe": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/probes/myhttpsettings')]"
+                            }
+                        }
+                    }
+                ],
+                "httpListeners": [
+                    {
+                        "name": "listenerport80",
+                        "properties": {
+                            "frontendIPConfiguration": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/frontendIPConfigurations/appGwPublicFrontendIp')]"
+                            },
+                            "frontendPort": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/frontendPorts/port_80')]"
+                            },
+                            "protocol": "Http",
+                            "hostNames": [],
+                            "requireServerNameIndication": false
+                        }
+                    }
+                ],
+                "urlPathMaps": [],
+                "requestRoutingRules": [
+                    {
+                        "name": "fronttoback",
+                        "properties": {
+                            "ruleType": "Basic",
+                            "httpListener": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/httpListeners/listenerport80')]"
+                            },
+                            "backendAddressPool": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/backendAddressPools/backendpool')]"
+                            },
+                            "backendHttpSettings": {
+                                "id": "[concat(resourceId('Microsoft.Network/applicationGateways', variables('applicationGatewaysname')), '/backendHttpSettingsCollection/myhttpsettings')]"
+                            }
+                        }
+                    }
+                ],
+                "probes": [
+                    {
+                        "name": "myhttpsettings",
+                        "properties": {
+                            "protocol": "Http",
+                            "path": "/",
+                            "interval": 30,
+                            "timeout": 30,
+                            "unhealthyThreshold": 3,
+                            "pickHostNameFromBackendHttpSettings": true,
+                            "minServers": 0,
+                            "match": {}
+                        }
+                    }
+                ],
+                "rewriteRuleSets": [],
+                "redirectConfigurations": [],
+                "enableHttp2": false,
+                "autoscaleConfiguration": {
+                    "minCapacity": 0,
+                    "maxCapacity": 10
+                }
+            }
+        }
+    ]
+}
