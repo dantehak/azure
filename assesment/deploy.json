@@ -1,0 +1,134 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+   
+
+
+    "rgName": {
+      "type": "string",
+      "metadata": {
+        "description": "The resourcegroup name that you want to create"
+      }
+    },
+    "rgLocation": {
+      "type": "string",
+      "defaultValue": "westeurope",
+      "metadata": {
+        "description": "The location for the to be created resourcegroup."
+      }
+    },
+    "VnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the to be created Virtual Network."
+      }
+    },
+    "vnetcreatelocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/VnetCreate.json"
+    },
+
+
+
+    "storagecreatelocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/StorageCreate.json"
+    },
+
+
+"storageAccountType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_GRS",
+        "Standard_ZRS",
+        "Premium_LRS"
+      ],
+      "metadata": {
+        "description": "Storage Account type"
+      }
+    },
+    "storagelocation": {
+      "type": "string",
+      "defaultValue": "westeurope",
+      "metadata": {
+        "description": "Location for storage account."
+      }
+    },
+    "isHnsEnabled": {
+            "type": "bool",
+            "defaultValue": true,
+      "allowedValues": [
+        true
+      ]
+            
+        }
+},
+  "resources": [
+    
+    
+
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2018-05-01",
+      "location": "[parameters('rgLocation')]",
+      "name": "[parameters('rgName')]",
+      "properties": {}
+    },
+   
+   
+   
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "dependsOn": [
+          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+       ],
+      "name": "VNetCreate",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[parameters('vnetcreatelocation')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "VnetName": { "value": "[parameters('VnetName')]" },
+          "rgLocation": { "value": "[parameters('rgLocation')]" }
+        }
+      }
+    },
+
+
+
+
+{
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "dependsOn": [
+          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+       ],
+      "name": "StorageCreate",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/StorageCreate.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "storageAccountType": { "value": "[parameters('storageAccountType')]" },
+          "storagelocation": { "value": "[parameters('storagelocation')]" },
+          "isHnsEnabled": { "value": "[parameters('isHnsEnabled')]" }
+        }
+      }
+    }
+
+     ],
+  "outputs": {}
+}

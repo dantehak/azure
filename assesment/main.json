@@ -286,7 +286,8 @@
         "parameters": {
           "storageAccountType": { "value": "[parameters('storageAccountType')]" },
           "storagelocation": { "value": "[parameters('storagelocation')]" },
-          "isHnsEnabled": { "value": "[parameters('isHnsEnabled')]" }
+          "isHnsEnabled": { "value": "[parameters('isHnsEnabled')]" },
+          "VnetName": { "value": "[parameters('VnetName')]" }
         }
       }
     },
@@ -311,6 +312,7 @@
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
+          "VnetName": { "value": "[parameters('VnetName')]" },
           "keyVaultName": { "value": "[parameters('keyVaultName')]" },
           "keyvaultlocation": { "value": "[parameters('keyvaultlocation')]" },
           "enabledForDeployment": { "value": "[parameters('enabledForDeployment')]" },
