@@ -2,6 +2,15 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    
+    "VnetName": {
+      "type": "string",
+       "metadata": {
+        "description": "Specifies the name of the Vnet"
+      }
+    },
+    
+    
     "keyVaultName": {
       "type": "string",
       "metadata": {
@@ -55,6 +64,13 @@
         "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
       }
     },
+    "subscriptionId": {
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+      }
+    },
     "objectId": {
       "type": "string",
       "metadata": {
@@ -102,10 +118,11 @@
         "description": "Specifies the value of the secret that you want to create."
       }
     }
-  },
+ },
 
 "variables": {
-      "keyvaultname": "[concat(parameters('keyvaultname'), uniquestring(resourceGroup().id))]"
+      "keyvaultname": "[concat(parameters('keyvaultname'), uniquestring(resourceGroup().id))]",
+      "subnetname": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('VnetName'), '-', uniqueString(resourceGroup().id), '-', 'vnet', '/subnets/')]"
     },
 
 
@@ -116,7 +133,7 @@
       "apiVersion": "2018-02-14",
       "location": "[parameters('keyvaultlocation')]",
       "properties": {
-        "enabledForDeployment": "[parameters('enabledForDeployment')]",
+         "enabledForDeployment": "[parameters('enabledForDeployment')]",
         "enabledForDiskEncryption": "[parameters('enabledForDiskEncryption')]",
         "enabledForTemplateDeployment": "[parameters('enabledForTemplateDeployment')]",
         "tenantId": "[parameters('tenantId')]",
@@ -135,11 +152,22 @@
           "family": "A"
         },
         "networkAcls": {
-            "defaultAction": "Allow",
-            "bypass": "AzureServices"
+                "defaultAction": "deny",
+                "bypass": "AzureServices",
+                "ipRules": [],
+                "virtualNetworkRules": [
+                    {
+                        "id": "[concat(variables('subnetname'), 'subnet-1')]",
+                        "ignoreMissingVnetServiceEndpoint": false
+                    },
+                    {
+                        "id": "[concat(variables('subnetname'), 'subnet-2')]",
+                        "ignoreMissingVnetServiceEndpoint": false
+                    }
+                ]
+            }
         }
-      }
-    },
+     },
     {
       "type": "Microsoft.KeyVault/vaults/secrets",
       "name": "[concat(variables('keyVaultName'), '/', parameters('secretName'))]",

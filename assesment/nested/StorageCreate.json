@@ -29,10 +29,25 @@
         true
       ]
             
-        }
+        },
+        "subscriptionId": {
+      "type": "string",
+      "defaultValue": "[subscription().subscriptionId]",
+      "metadata": {
+        "description": "Specifies the Azure Active Directory tenant ID that should be used for authenticating requests to the key vault. Get it by using Get-AzSubscription cmdlet."
+      }
+      },
+      "VnetName": {
+      "type": "string",
+       "metadata": {
+        "description": "Specifies the name of the Vnet"
+      }
+    }
   },
   "variables": {
-    "storageAccountName": "[concat('store', uniquestring(resourceGroup().id))]"
+    "storageAccountName": "[concat('store', uniquestring(resourceGroup().id))]",
+    "subnetname": "[concat('/subscriptions/', parameters('subscriptionId'), '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', parameters('VnetName'), '-', uniqueString(resourceGroup().id), '-', 'vnet', '/subnets/')]"
+
   },
   "resources": [
     {
@@ -45,7 +60,22 @@
       },
       "kind": "StorageV2",
       "properties": {
-          "isHnsEnabled": "[parameters('isHnsEnabled')]"
+          "isHnsEnabled": "[parameters('isHnsEnabled')]",
+          "networkAcls": {
+                "defaultAction": "deny",
+                "bypass": "AzureServices",
+                "ipRules": [],
+                "virtualNetworkRules": [
+                    {
+                        "id": "[concat(variables('subnetname'), 'subnet-1')]",
+                        "ignoreMissingVnetServiceEndpoint": false
+                    },
+                    {
+                        "id": "[concat(variables('subnetname'), 'subnet-2')]",
+                        "ignoreMissingVnetServiceEndpoint": false
+                    }
+                ]
+            }
       }
     }
   ],
