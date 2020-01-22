@@ -270,7 +270,8 @@
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2018-05-01",
       "dependsOn": [
-          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]",
+          "VnetCreate"
        ],
       "name": "StorageCreate",
       "resourceGroup": "[parameters('rgName')]",

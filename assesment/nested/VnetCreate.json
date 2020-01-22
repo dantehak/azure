@@ -37,13 +37,31 @@
             {
               "name": "[variables('VnetSubnet1Name')]",
               "properties": {
-                "addressPrefix": "[variables('VnetSubnet1Prefix')]"
+                "addressPrefix": "[variables('VnetSubnet1Prefix')]",
+                "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "westeurope",
+                                        "northeurope"
+                                    ]
+                                }
+                            ]
               }
             },
             {
               "name": "[variables('VnetSubnet2Name')]",
               "properties": {
-                "addressPrefix": "[variables('VnetSubnet2Prefix')]"
+                "addressPrefix": "[variables('VnetSubnet2Prefix')]",
+                "serviceEndpoints": [
+                                {
+                                    "service": "Microsoft.Storage",
+                                    "locations": [
+                                        "westeurope",
+                                        "northeurope"
+                                    ]
+                                }
+                            ]
               }
             }
           ]
