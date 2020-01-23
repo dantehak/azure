@@ -8,6 +8,12 @@
       "applicationGatewayname": {
             "type": "String"
         },
+        "AppgwTag": {
+            "type": "String"
+        },
+        "PublicIPForGWTag": {
+            "type": "String"
+        },
         "VnetName": {
             "type": "String"
         },
@@ -67,6 +73,9 @@
             "sku": {
                 "name": "[parameters('pubipsku')]"
             },
+            "tags": {
+        "displayName": "[parameters('PublicIPforGWTag')]"
+      },
             "properties": {
                 "publicIPAllocationMethod": "[parameters('publicIPAllocationMethod')]",
                 "idleTimeoutInMinutes": "[parameters('pubipidleTimeoutInMinutes')]",
@@ -84,6 +93,9 @@
             "dependsOn": [
           "[resourceId('Microsoft.Network/publicIPAddresses/', variables('pubipname'))]"
        ],
+            "tags": {
+          "displayName": "[parameters('AppGWTag')]"
+        },
             "location": "westeurope",
             "properties": {
                 "sku": {

@@ -5,6 +5,9 @@
     "VnetName": {
       "type": "string"
     },
+     "VnetTag": {
+      "type": "string"
+    },
     "rgLocation": {
       "type": "string"
     }
@@ -25,7 +28,7 @@
         "apiVersion": "2016-12-01",
         "dependsOn": [],
         "tags": {
-          "displayName": "Virtual Network"
+          "displayName": "[parameters('VnetTag')]"
         },
         "properties": {
           "addressSpace": {

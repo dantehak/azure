@@ -11,6 +11,12 @@
       "type": "string",
       "minLength": 1
     },
+    "HostingPlanTag": {
+            "type": "String"
+        },
+    "WebAppTag": {
+            "type": "String"
+        },
     "skuNameFarmHosting": {
       "type": "string",
       "defaultValue": "F1",
@@ -52,7 +58,7 @@
       "type": "Microsoft.Web/serverfarms",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "HostingPlan"
+        "displayName": "[parameters('HostingPlanTag')]"
       },
       "sku": {
         "name": "[parameters('skuNameFarmHosting')]",
@@ -74,7 +80,7 @@
       
       "tags": {
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('hostingPlanName'))]": "Resource",
-        "displayName": "Website"
+        "displayName": "[parameters('WebAppTag')]"
       },
       "dependsOn": [
         "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanName'))]"

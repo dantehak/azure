@@ -27,6 +27,12 @@
         "description": "The name of the to be created Virtual Network."
       }
     },
+     "VnetTag": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the tag for the vnet."
+      }
+    },
     "vnetcreatelocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/VnetCreate.json"
@@ -37,6 +43,13 @@
     "storagecreatelocation": {
       "type": "string",
       "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/StorageCreate.json"
+    },
+
+    "StorageAccountTag": {
+      "type": "string",
+       "metadata": {
+        "description": "Specify the name of Storage Account Tag"
+      }
     },
 
 
@@ -82,6 +95,12 @@
       "type": "string",
       "metadata": {
         "description": "Specifies the name of the key vault."
+      }
+    },
+     "keyvaultTag": {
+      "type": "string",
+      "metadata": {
+        "description": "Give the name for the tag."
       }
     },
     "keyvaultlocation": {
@@ -197,6 +216,12 @@
       "type": "string",
       "minLength": 1
     },
+      "HostingPlanTag": {
+            "type": "String"
+        },
+      "WebAppTag": {
+            "type": "String"
+        },
     "skuNameFarmHosting": {
       "type": "string",
       "defaultValue": "F1",
@@ -239,8 +264,14 @@
       "applicationGatewayname": {
             "type": "String"
         },
+ "AppgwTag": {
+            "type": "String"
+        },
        
         "PublicIPName": {
+            "type": "String"
+        },
+        "PublicIPForGWTag": {
             "type": "String"
         },
         "pubiplocation": {
@@ -312,7 +343,8 @@
         },
         "parameters": {
           "VnetName": { "value": "[parameters('VnetName')]" },
-          "rgLocation": { "value": "[parameters('rgLocation')]" }
+          "rgLocation": { "value": "[parameters('rgLocation')]" },
+          "VnetTag": { "value": "[parameters('VnetTag')]" }
         }
       }
     },
@@ -336,6 +368,7 @@
         },
         "parameters": {
           "storageAccountType": { "value": "[parameters('storageAccountType')]" },
+          "storageAccountTag": { "value": "[parameters('StorageAccountTag')]" },
           "storagelocation": { "value": "[parameters('storagelocation')]" },
           "isHnsEnabled": { "value": "[parameters('isHnsEnabled')]" },
           "VnetName": { "value": "[parameters('VnetName')]" }
@@ -363,6 +396,7 @@
         "parameters": {
           "VnetName": { "value": "[parameters('VnetName')]" },
           "keyVaultName": { "value": "[parameters('keyVaultName')]" },
+          "KeyvaultTag": { "value": "[parameters('keyvaultTag')]" },
           "keyvaultlocation": { "value": "[parameters('keyvaultlocation')]" },
           "enabledForDeployment": { "value": "[parameters('enabledForDeployment')]" },
           "enabledForDiskEncryption": { "value": "[parameters('enabledForDiskEncryption')]" },
@@ -397,6 +431,8 @@
         "parameters": {
          "hostingPlanName": { "value": "[parameters('hostingPlanName')]" },
           "WebsiteName": { "value": "[parameters('WebsiteName')]" },
+          "WebappTag": { "value": "[parameters('WebappTag')]" },
+          "HostingPlanTag": { "value": "[parameters('HostingPlanTag')]" },
           "skuNameFarmHosting": { "value": "[parameters('skuNameFarmHosting')]" },
           "skuHostingFarm": { "value": "[parameters('skuHostingFarm')]" }
         }
@@ -410,7 +446,7 @@
       "apiVersion": "2018-05-01",
       "dependsOn": [
           "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
-       ],
+          ],
       "name": "AppGatewayCreate",
       "resourceGroup": "[parameters('rgName')]",
       "properties": {
@@ -422,6 +458,8 @@
         "parameters": {
          "websitename": { "value": "[parameters('websitename')]" },
           "applicationGatewayname": { "value": "[parameters('applicationGatewayname')]" },
+          "appgwtag": { "value": "[parameters('AppgwTag')]" },
+          "publicipforgwtag": { "value": "[parameters('PublicIPForGWTag')]" },
           "VnetName": { "value": "[parameters('VnetName')]" },
           "PublicIPName": { "value": "[parameters('PublicIPName')]" },
           "pubiplocation": { "value": "[parameters('pubiplocation')]" },
@@ -433,9 +471,6 @@
         }
       }
     }
-
-
-
-  ],
+],
   "outputs": {}
 }

@@ -42,6 +42,12 @@
        "metadata": {
         "description": "Specifies the name of the Vnet"
       }
+    },
+     "StorageAccountTag": {
+      "type": "string",
+       "metadata": {
+        "description": "Specify the name of Storage Account Tag"
+      }
     }
   },
   "variables": {
@@ -59,6 +65,9 @@
         "name": "[parameters('storageAccountType')]"
       },
       "kind": "StorageV2",
+      "tags": {
+        "displayName": "[parameters('StorageAccountTag')]"
+      },
       "properties": {
           "isHnsEnabled": "[parameters('isHnsEnabled')]",
           "networkAcls": {
