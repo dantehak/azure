@@ -277,7 +277,6 @@
       "resourceGroup": "[parameters('rgName')]",
       "properties": {
         "mode": "Incremental",
-        
         "templateLink": {
           "uri": "[parameters('storagecreatelocation')]",
           "contentVersion": "1.0.0.0"
@@ -303,11 +302,9 @@
       "resourceGroup": "[parameters('rgName')]",
       "properties": {
         "mode": "Incremental",
-        "expressionEvaluationOptions": {
-            "scope": "inner"
-          },
+        
         "templateLink": {
-          "uri": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/KeyvaultCreate.json",
+          "uri": "[parameters('keyvaultcreatelocation')]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
