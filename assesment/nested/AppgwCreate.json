@@ -5,7 +5,7 @@
         "websitename": {
             "type": "String"
         },
-      "applicationGatewaysname": {
+      "applicationGatewayname": {
             "type": "String"
         },
         "VnetName": {
@@ -13,9 +13,6 @@
         },
         "PublicIPName": {
             "type": "String"
-        },
-        "pubipname": {
-            "type": "string"
         },
         "pubiplocation": {
             "type": "string",
@@ -55,11 +52,10 @@
     "VnetExtID": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/virtualNetworks/', variables('VnetName'))]",
     "VnetName": "[concat(parameters('VnetName'), '-', variables('creatergstring'), '-vnet')]",
     "creatergstring": "[uniqueString(resourceGroup().id)]",
-    "PublicIPName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', variables('PublicIPName0'))]",
-    "applicationGatewaysname": "[concat(parameters('applicationGatewaysname'), '-', variables('creatergstring'), '-gateway')]",
-    "PublicIPName0": "[concat(parameters('PublicIPName'), '-', variables('creatergstring'), '-gwpubip')]",
+    "PublicIPName": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Network/publicIPAddresses/', variables('PubipName'))]",
+    "applicationGatewaysname": "[concat(parameters('applicationGatewayname'), '-', variables('creatergstring'), '-gateway')]",
     "webSiteName": "[concat(parameters('WebsiteName'),'-', uniqueString(resourceGroup().id),'-','website')]",
-    "PubipName": "[concat(parameters('pubipname'), '-', variables('creatergstring'), '-gwpubip')]",
+    "PubipName": "[concat(parameters('PublicIPName'), '-', variables('creatergstring'), '-gwpubip')]",
     "PubipDomainName": "[concat(parameters('pubipdomainNameLabel'), '-', variables('creatergstring'), '-gwpubip')]"
     },
     "resources": [

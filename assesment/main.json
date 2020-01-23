@@ -18,6 +18,9 @@
         "description": "The location for the to be created resourcegroup."
       }
     },
+
+// Vnet Create Parameters
+
     "VnetName": {
       "type": "string",
       "metadata": {
@@ -220,9 +223,57 @@
       "metadata": {
         "description": "Describes plan's instance count"
       }
-    }
+    },
 
 
+// Application Gateway Parameters
+
+
+"appgwcreatelocation": {
+      "type": "string",
+      "defaultValue": "https://raw.githubusercontent.com/dantehak/azure/master/assesment/nested/AppgwCreate.json"
+    },
+
+      "applicationGatewayname": {
+            "type": "String"
+        },
+       
+        "PublicIPName": {
+            "type": "String"
+        },
+        "pubiplocation": {
+            "type": "string",
+            "defaultValue": "westeurope"
+
+        },
+        "pubipsku": {
+            "type": "string",
+            "defaultValue": "Standard",
+            "allowedValues": [
+                "Basic",
+                "Standard"
+            ]
+        },
+        "publicIPAllocationMethod": {
+            "type": "string",
+            "defaultValue": "Static",
+            "allowedValues": [
+                "Dynamic",
+                "Static"
+            ]
+        },
+        "pubipidleTimeoutInMinutes": {
+            "type": "int",
+            "defaultValue": 4
+        },
+        "pubipdomainNameLabel": {
+            "type": "string"
+            
+        },
+        "publicIpAddressVersion": {
+            "type": "string",
+            "defaultValue": "IPv4"
+        }
 
   },
   "variables": {
@@ -346,6 +397,37 @@
           "WebsiteName": { "value": "[parameters('WebsiteName')]" },
           "skuNameFarmHosting": { "value": "[parameters('skuNameFarmHosting')]" },
           "skuHostingFarm": { "value": "[parameters('skuHostingFarm')]" }
+        }
+      }
+    },
+
+// Create Application Gateway
+
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2018-05-01",
+      "dependsOn": [
+          "[resourceId('Microsoft.Resources/resourceGroups/', parameters('rgName'))]"
+       ],
+      "name": "AppGatewayCreate",
+      "resourceGroup": "[parameters('rgName')]",
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[parameters('appgwcreatelocation')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+         "websitename": { "value": "[parameters('websitename')]" },
+          "applicationGatewayname": { "value": "[parameters('applicationGatewayname')]" },
+          "VnetName": { "value": "[parameters('VnetName')]" },
+          "PublicIPName": { "value": "[parameters('PublicIPName')]" },
+          "pubiplocation": { "value": "[parameters('pubiplocation')]" },
+          "pubipsku": { "value": "[parameters('pubipsku')]" },
+          "publicIPAllocationMethod": { "value": "[parameters('publicIPAllocationMethod')]" },
+          "pubipidleTimeoutInMinutes": { "value": "[parameters('pubipidleTimeoutInMinutes')]" },
+          "pubipdomainNameLabel": { "value": "[parameters('pubipdomainNameLabel')]" },
+          "publicIpAddressVersion": { "value": "[parameters('publicIpAddressVersion')]" }
         }
       }
     }
