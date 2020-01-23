@@ -45,6 +45,12 @@
                                         "westeurope",
                                         "northeurope"
                                     ]
+                                },
+                                {
+                                    "service": "Microsoft.KeyVault",
+                                    "locations": [
+                                        "*"
+                                    ]
                                 }
                             ]
               }
@@ -59,6 +65,12 @@
                                     "locations": [
                                         "westeurope",
                                         "northeurope"
+                                    ]
+                                },
+                                {
+                                    "service": "Microsoft.KeyVault",
+                                    "locations": [
+                                        "*"
                                     ]
                                 }
                             ]
