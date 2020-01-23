@@ -134,7 +134,9 @@
     "objectId": {
       "type": "string",
       "metadata": {
-        "description": "Specifies the object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies. Get it by using Get-AzADUser or Get-AzADServicePrincipal cmdlets."
+        "description": "Specifies the object ID of a user, service principal or security group in the Azure Active Directory tenant for the vault. The object ID must be unique for the list of access policies. Get it by using Get-AzADUser or Get-AzADServicePrincipal cmdlets.
+        Your Azure AD user object ID is needed by the template to configure permissions. Get your Object ID via the Azure Portal or via Powershell or Azure CLI.
+        See https://docs.microsoft.com/bs-latn-ba/azure/key-vault/quick-create-template?tabs=PowerShell for more info. "
       }
     },
     "keysPermissions": {
